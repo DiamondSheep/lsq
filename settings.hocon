@@ -1,0 +1,17 @@
+# --------- General Settings ----------
+
+device = 0
+dataset = imagenet
+
+dataset_path = ./imagenet/ILSVRC2012_img_val.lmdb
+# For local machine:   ./imagenet/ILSVRC2012_img_val.lmdb
+# For virtual machine: /home/gaoyc/data/ILSVRC2012
+
+batch_size = 128
+model = resnet18
+
+# -------- Quantization Settings -------
+
+mode = squant
+weight_bit_width = 4
+activation_bit_width = 4
