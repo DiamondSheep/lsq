@@ -1,0 +1,17 @@
+
+# --------- General Settings ----------
+
+device = 0
+task = detection
+dataset = coco
+
+dataset_path = ./data/coco-2017/
+
+batch_size = 128
+model = resnet18
+
+# -------- Quantization Settings -------
+
+mode = default
+weight_bit_width = 4
+activation_bit_width = 4

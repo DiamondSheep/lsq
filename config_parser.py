@@ -3,6 +3,8 @@ import logging
 import uuid
 from pyhocon import ConfigFactory
 
+logger = logging.getLogger(__name__)
+
 class ConfigParser(object):
 	def __init__(self, conf_path):
 		super(ConfigParser, self).__init__()
@@ -10,6 +12,7 @@ class ConfigParser(object):
 
 		#  ---------- General settings ----------
 		self.device = str(self.conf['device'])
+		self.task = str(self.conf['task'])
 		self.dataset = self.conf['dataset']
 		self.datasetPath = self.conf['dataset_path']  # path for loading data set
 		self.batch_size = self.conf['batch_size']

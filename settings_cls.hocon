@@ -1,6 +1,8 @@
+
 # --------- General Settings ----------
 
 device = 0
+task = classification
 dataset = imagenet
 
 dataset_path = ./imagenet/ILSVRC2012_img_val.lmdb

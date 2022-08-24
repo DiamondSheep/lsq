@@ -4,43 +4,36 @@ import torch.nn as nn
 import argparse
 import logging
 
-from pytorchcv.model_provider import get_model
-from config_parser import ConfigParser, print_config, benchmark
+from config_parser import ConfigParser, print_config, benchmark, logger
+from model_utils import *
 from dataloader import *
 from eval_utils import *
 
-parser = argparse.ArgumentParser(description='SQuant')
-parser.add_argument('--settings', default='./settings.hocon', type=str,
+parser = argparse.ArgumentParser(description='Quant')
+parser.add_argument('--settings', default='./settings_det.hocon', type=str,
                     help='Configuration path')
 parser.add_argument('--model_path', default=None, type=str,
                     help='path to load pretrained model')
 parser.add_argument('--seed', '-s', default=1, type=int,
                     help='random seed setting')
 args = parser.parse_args()
-
 configs = ConfigParser(args.settings)
 
-### Setting GPU device
+### GPU device setting 
 os.environ['CUDA_DEVICE_ORDER'] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = configs.device
 print("-- CUDA device: {}".format(os.environ["CUDA_VISIBLE_DEVICES"]))
 
+### Logger setting
+log_path = configs.set_logging()
+configs.seed = args.seed
+
 if __name__ == "__main__":
-    ### Logger setting
-    log_path = configs.set_logging()
-    logger = logging.getLogger(__name__)
-    configs.seed = args.seed
+
     print_config(logger, configs)
 
     ### Model
-    logger.info(f'Loading pretrained model: {configs.model}')
-
-    if (args.model_path):
-        print("Load local model path: {}".format(args.model_path))
-        model = get_model(configs.model, pretrained=False)
-        model.load_state_dict(torch.load(args.model_path))
-    else:
-        model = get_model(configs.model, pretrained=True)
+    model = get_fp_model(configs.task, configs.dataset, configs.model)
     model = model.cuda()
 
     ### Load validation data
