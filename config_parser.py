@@ -15,6 +15,7 @@ class ConfigParser(object):
 		self.task = str(self.conf['task'])
 		self.dataset = self.conf['dataset']
 		self.datasetPath = self.conf['dataset_path']  # path for loading data set
+		self.img_size = self.conf['img_size']
 		self.batch_size = self.conf['batch_size']
 		self.model = self.conf['model']
 		

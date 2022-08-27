@@ -7,8 +7,9 @@ dataset = coco
 
 dataset_path = ./data/coco-2017/
 
-batch_size = 128
-model = resnet18
+batch_size = 16
+img_size = 320
+model = yolov3
 
 # -------- Quantization Settings -------
 

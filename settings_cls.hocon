@@ -10,6 +10,7 @@ dataset_path = ./imagenet/ILSVRC2012_img_val.lmdb
 # For virtual machine: /home/gaoyc/data/ILSVRC2012
 
 batch_size = 128
+img_size = 224
 model = resnet18
 
 # -------- Quantization Settings -------

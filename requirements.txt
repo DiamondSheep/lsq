@@ -1,2 +1,4 @@
 pyhocon
 progress
+pycocotools
+gluoncv

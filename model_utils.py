@@ -1,6 +1,10 @@
 import torch
 import logging
+# ImageNet
 from pytorchcv.model_provider import get_model
+# COCO
+from gluoncv.torch import model_zoo
+
 from dataloader import *
 from eval_utils import *
 from config_parser import logger
@@ -31,10 +35,12 @@ def get_fp_model(task, dataset, model_name, model_path=None):
 
     elif (task == 'detection'):
         if dataset == 'coco':
-            # TODO: load coco dataset here
-            logger.info("to load coco data here.")
-            exit(0)
-            pass
+            if model_name == 'yolov3':
+                model = model_zoo.get_model("yolo3_darknet53_coco", pretrained=True)
+
+            else: 
+                logger.info(f"No supported model {model_name}")
+            return model
         else:
             logger.info(f"No supported dataset {dataset} for task {task}.\n")
         

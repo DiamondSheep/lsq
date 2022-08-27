@@ -3,34 +3,44 @@ import torch.nn as nn
 from progress.bar import Bar
 
 @torch.no_grad()
-def validate(model, testloader, logger, verbose=True):
-    total, correct = 0, 0
-    bar = Bar('Testing', max=len(testloader))
-    model.eval()
-    top1_error = AverageMeter()
-    top5_error = AverageMeter()
-    with torch.no_grad():
-        for batch_idx, (inputs, targets) in enumerate(testloader):
-            inputs, targets = inputs.cuda(), targets.cuda()
-            outputs = model(inputs)
-            loss = torch.ones(1)
-            single_top1_error, loss, single_top5_error = compute_singlecrop(
-				outputs=outputs, labels=targets, loss=loss, 
-				top5_flag=True, mean_flag=True)
-            top1_error.update(single_top1_error)
-            top5_error.update(single_top5_error)
-            #_, predicted = outputs.max(1)
-            #total += targets.size(0)
-            #correct += predicted.eq(targets).sum().item()
-            #acc = correct / total
+def validate(model, testloader, logger, configs, verbose=True):
+    
+    if configs.task == 'classification':
+        total, correct = 0, 0
+        bar = Bar('Testing', max=len(testloader))
+        model.eval()
+        top1_error = AverageMeter()
+        top5_error = AverageMeter()
+        with torch.no_grad():
+            for batch_idx, (inputs, targets) in enumerate(testloader):
+                inputs, targets = inputs.cuda(), targets.cuda()
+                outputs = model(inputs)
+                loss = torch.ones(1)
+                single_top1_error, loss, single_top5_error = compute_singlecrop(
+                    outputs=outputs, labels=targets, loss=loss, 
+                    top5_flag=True, mean_flag=True)
+                top1_error.update(single_top1_error)
+                top5_error.update(single_top5_error)
+                #_, predicted = outputs.max(1)
+                #total += targets.size(0)
+                #correct += predicted.eq(targets).sum().item()
+                #acc = correct / total
 
-            bar.suffix = f'({batch_idx + 1}/{len(testloader)}) | ETA: {bar.eta_td} | top1: {100.0 - top1_error.avg} | top5: {100.0 - top5_error.avg}'
-            bar.next()
-    if verbose:
-        logger.info('\nFinal result: top1 %.3f%% , top5 %.3f%%' % (100.0 - top1_error.avg, 100.0 - top5_error.avg))
-    bar.finish()
-    model.train()
-    return 100.0 - top1_error.avg, 100.0 - top5_error.avg
+                bar.suffix = f'({batch_idx + 1}/{len(testloader)}) | ETA: {bar.eta_td} | top1: {100.0 - top1_error.avg} | top5: {100.0 - top5_error.avg}'
+                bar.next()
+        if verbose:
+            logger.info('\nFinal result: top1 %.3f%% , top5 %.3f%%' % (100.0 - top1_error.avg, 100.0 - top5_error.avg))
+        bar.finish()
+        model.train()
+        return 100.0 - top1_error.avg, 100.0 - top5_error.avg
+
+    elif configs.task == 'detection':
+        model.eval()
+        with torch.no_grad():
+            for batch_idx, (inputs, targets) in enumerate(testloader):
+                inputs, targets = inputs.cuda(), targets.cuda()
+                outputs = model(inputs)
+                c = input()
 
 def compute_singlecrop(outputs, labels, loss, top5_flag=False, mean_flag=False):
     with torch.no_grad():

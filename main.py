@@ -41,6 +41,7 @@ if __name__ == "__main__":
     valloader = getValData(dataset=configs.dataset,
                         batch_size=configs.batch_size,
                         path=configs.datasetPath,
+                        img_size=configs.img_size,
                         for_inception=configs.model.startswith('inception'))
 
     ### Validate original model
@@ -48,4 +49,4 @@ if __name__ == "__main__":
     #logger.info("Full-precision results\n\tTop1:{:.3f}\tTop5:{:.3f}".format(top1, top5))
 
     ### Validation
-    top1, top5 = validate(model, valloader, logger)
+    top1, top5 = validate(model, valloader, logger, configs)
