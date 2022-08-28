@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 # ImageNet
 from data_utils.get_imagenet import FileDataset, get_train_dataloader, get_val_dataloader
 #COCO
-from data_utils.get_coco import COCODataset
+from data_utils.get_coco import COCODataset, Normalizer, Resizer
 
 def getValData(dataset='imagenet',
                 batch_size=1024,
@@ -67,15 +67,10 @@ def getValData(dataset='imagenet',
         return test_loader
     
     elif dataset == 'coco':
-        input_size = img_size
-        normalize = transforms.Normalize(mean=(0.4694, 0.4460, 0.4066),
-                                         std=(0.2433, 0.2384, 0.2417))
-        test__transform = transforms.Compose([transforms.Resize(int(input_size)),
-                                              transforms.ToTensor(), 
-                                              normalize])
+        test_transform = transforms.Compose([Normalizer(), Resizer(img_size=img_size)])
         test_dataset = COCODataset(data_path = path, 
                                    mode = 'val', 
-                                   transform = None)
+                                   transform = test_transform)
         test_loader = DataLoader(test_dataset, 
                                  batch_size = batch_size, 
                                  shuffle = False, 
@@ -84,3 +79,13 @@ def getValData(dataset='imagenet',
 
     else:
         return None
+
+if __name__ == "__main__":
+    valloader = getValData(dataset='coco',
+                        batch_size=1,
+                        path='./data/coco-2017/',
+                        img_size=640,
+                        for_inception=False)
+    for i, data in enumerate(valloader):
+        print(f"iter: {i} | image shape: {data['img'].shape} | label shape: {data['annot'].shape}")
+        c = input()

@@ -37,11 +37,12 @@ def validate(model, testloader, logger, configs, verbose=True):
     elif configs.task == 'detection':
         model.eval()
         with torch.no_grad():
-            for batch_idx, (inputs, targets) in enumerate(testloader):
-                logger.info(f'{inputs.shape}, {targets}')
-                c = input()
-                inputs, targets = inputs.cuda(), targets.cuda()
+            for batch_idx, data in enumerate(testloader):
+                scale = data['scale']
+                inputs, targets = data['img'].permute(
+                0, 3, 1, 2).cuda(), data['annot'].cuda()
                 outputs = model(inputs)
+                # TODO
                 c = input()
 
 def compute_singlecrop(outputs, labels, loss, top5_flag=False, mean_flag=False):

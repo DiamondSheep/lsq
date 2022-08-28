@@ -5,6 +5,7 @@ import skimage
 import matplotlib.pyplot as plt
 import pylab
 from PIL import Image
+import cv2
 from torch.utils.data import DistributedSampler
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, Dataset
@@ -12,6 +13,65 @@ from torch.utils.data import DataLoader, Dataset
 from pycocotools.coco import COCO
 
 pylab.rcParams['figure.figsize'] = (8.0, 10.0)
+
+class Augmenter(object):
+    """Convert ndarrays in sample to Tensors."""
+
+    def __call__(self, sample, flip_x=0.5):
+        if np.random.rand() < flip_x:
+            image, annots = sample['img'], sample['annot']
+            image = image[:, ::-1, :]
+
+            rows, cols, channels = image.shape
+
+            x1 = annots[:, 0].copy()
+            x2 = annots[:, 2].copy()
+
+            x_tmp = x1.copy()
+
+            annots[:, 0] = cols - x2
+            annots[:, 2] = cols - x_tmp
+
+            sample = {'img': image, 'annot': annots}
+
+        return sample
+
+class Resizer(object):
+    def __init__(self, img_size=512):
+        self.common_size=img_size
+    """
+    Convert ndarrays in sample to Tensors.
+    """
+    def __call__(self, sample):
+        image, annots = sample['img'], sample['annot']
+        height, width, _ = image.shape
+        if height > width:
+            scale = self.common_size / height
+            resized_height = self.common_size
+            resized_width = int(width * scale)
+        else:
+            scale = self.common_size / width
+            resized_height = int(height * scale)
+            resized_width = self.common_size
+
+        image = cv2.resize(image, (resized_width, resized_height))
+
+        new_image = np.zeros((self.common_size, self.common_size, 3))
+        new_image[0:resized_height, 0:resized_width] = image
+        annots[:, :4] *= scale
+
+        return {'img': torch.from_numpy(new_image), 'annot': torch.from_numpy(annots), 'scale': scale}
+
+class Normalizer(object):
+
+    def __init__(self):
+        # For COCO dataset
+        self.mean = np.array([[[0.485, 0.456, 0.406]]])
+        self.std = np.array([[[0.229, 0.224, 0.225]]])
+
+    def __call__(self, sample):
+        image, annots = sample['img'], sample['annot']
+        return {'img': ((image.astype(np.float32) - self.mean) / self.std), 'annot': annots}
 
 class COCODataset(Dataset):
     """
@@ -59,22 +119,16 @@ class COCODataset(Dataset):
     def load_image(self, image_index):
         image_info = self.coco.loadImgs(self.image_ids[image_index])[0]
         path = os.path.join(self.data_path, image_info['file_name'])
-
-        img = skimage.io.imread(path)
+        img = cv2.imread(path)
 
         if len(img.shape) == 2:
-            img = skimage.color.gray2rgb(img)
-        
-        img = img.astype(np.float32) / 255.0
-
-        if self.transform:
-            img = self.transform(img)
-
+            img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
         return img
 
     def load_annotations(self, image_index):
         # get ground truth annotations
-        annotations_ids = self.coco.getAnnIds(imgIds=self.image_ids[image_index], iscrowd=False)
+        annotations_ids = self.coco.getAnnIds(
+            imgIds=self.image_ids[image_index], iscrowd=False)
         annotations = np.zeros((0, 5))
 
         # some images appear to miss annotations (like image with id 257034)
@@ -82,8 +136,8 @@ class COCODataset(Dataset):
             return annotations
 
         # parse annotations
-        cocos = self.coco.loadAnns(annotations_ids)
-        for idx, a in enumerate(cocos):
+        coco_annotations = self.coco.loadAnns(annotations_ids)
+        for idx, a in enumerate(coco_annotations):
 
             # some annotations have basically no width / height, skip them
             if a['bbox'][2] < 1 or a['bbox'][3] < 1:
@@ -98,9 +152,6 @@ class COCODataset(Dataset):
         annotations[:, 2] = annotations[:, 0] + annotations[:, 2]
         annotations[:, 3] = annotations[:, 1] + annotations[:, 3]
 
-        # e.g return format
-        # [[41.79 416.21 175.19 445.76  30.]
-        #  [414.81 437.17 484.14 448.52  30.]]
         return annotations
 
     def coco_label_to_label(self, coco_label):
@@ -129,8 +180,10 @@ class COCODataset(Dataset):
     def __getitem__(self, idx):
         img = self.load_image(idx)
         annot = self.load_annotations(idx)
-        #sample = {'img': img, 'annot': annot}
-        return img, annot
+        sample = {'img': img, 'annot': annot}
+        if self.transform:
+            sample = self.transform(sample)
+        return sample
 
 class mean_and_std():
     def __init__(self, loader):
