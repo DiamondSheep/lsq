@@ -38,6 +38,8 @@ def validate(model, testloader, logger, configs, verbose=True):
         model.eval()
         with torch.no_grad():
             for batch_idx, (inputs, targets) in enumerate(testloader):
+                logger.info(f'{inputs.shape}, {targets}')
+                c = input()
                 inputs, targets = inputs.cuda(), targets.cuda()
                 outputs = model(inputs)
                 c = input()

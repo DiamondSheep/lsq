@@ -33,8 +33,13 @@ if __name__ == "__main__":
     print_config(logger, configs)
 
     ### Model
-    model = get_fp_model(configs.task, configs.dataset, configs.model)
-    model = model.cuda()
+    model = get_fp_model(configs.task, configs.dataset, configs.model, args.model_path)
+    if model is not None:
+        logger.info("model is loaded.")
+        model = model.cuda()
+    else:
+        logger.info("failed to load model.")
+        exit(0)
 
     ### Load validation data
     logger.info(f'Preparing data: {configs.dataset}')

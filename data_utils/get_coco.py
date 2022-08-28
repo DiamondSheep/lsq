@@ -129,10 +129,8 @@ class COCODataset(Dataset):
     def __getitem__(self, idx):
         img = self.load_image(idx)
         annot = self.load_annotations(idx)
-
-        sample = {'img': img, 'annot': annot}
-        
-        return sample
+        #sample = {'img': img, 'annot': annot}
+        return img, annot
 
 class mean_and_std():
     def __init__(self, loader):
