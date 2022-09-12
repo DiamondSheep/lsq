@@ -5,10 +5,10 @@ device = 0
 task = detection
 dataset = coco
 
-dataset_path = ./data/coco-2017/
+dataset_path = ./data/coco/
 
 batch_size = 1
-img_size = 320
+img_size = 640
 model = yolov3
 
 # -------- Quantization Settings -------
