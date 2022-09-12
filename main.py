@@ -36,22 +36,21 @@ if __name__ == "__main__":
     model = get_fp_model(configs.task, configs.dataset, configs.model, args.model_path)
     if model is not None:
         logger.info("model is loaded.")
-        model = model.cuda()
     else:
         logger.info("failed to load model.")
         exit(0)
 
     ### Load validation data
-    logger.info(f'Preparing data: {configs.dataset}')
-    valloader = getValData(dataset=configs.dataset,
-                        batch_size=configs.batch_size,
-                        path=configs.datasetPath,
-                        img_size=configs.img_size,
-                        for_inception=configs.model.startswith('inception'))
-
-    ### Validate original model
-    #top1, top5 = validate(model, valloader, logger)
-    #logger.info("Full-precision results\n\tTop1:{:.3f}\tTop5:{:.3f}".format(top1, top5))
-
-    ### Validation
-    top1, top5 = validate(model, valloader, logger, configs)
+    if configs.task == 'classification':
+        logger.info(f'Preparing data: {configs.dataset}')
+        valloader = getValData(dataset=configs.dataset,
+                            batch_size=configs.batch_size,
+                            path=configs.datasetPath,
+                            img_size=configs.img_size,
+                            for_inception=configs.model.startswith('inception'))
+        top1, top5 = validate(model, valloader, logger, configs)
+    
+    elif configs.task == 'detection':
+        validate_det(model=model)
+    else:
+        logger.info("Unsupported task.")

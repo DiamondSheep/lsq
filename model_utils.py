@@ -7,6 +7,15 @@ from dataloader import *
 from eval_utils import *
 from config_parser import logger
 
+# YOLO modules
+FILE = Path(__file__).resolve()
+ROOT = FILE.parents[0]  # root directory
+YOLOROOT = os.path.join(ROOT, 'yolov3')
+if str(YOLOROOT) not in sys.path:
+    sys.path.append(str(YOLOROOT))  # add YOLOROOT to PATH
+YOLOROOT = Path(os.path.relpath(YOLOROOT, Path.cwd()))  # relative
+from yolov3.models.common import DetectMultiBackend
+
 def get_fp_model(task, dataset, model_name, model_path=None):
     logger.info(f'Loading pretrained model {model_name} for {dataset} dataset for {task} task')
     # For classification
@@ -31,18 +40,11 @@ def get_fp_model(task, dataset, model_name, model_path=None):
 
     # For detection
     elif (task == 'detection'):
-        if (model_path):
-            # from given model path
-            model = get_model(model_name, pretrained=False)
-            model.load_state_dict(torch.load(model_path))
-            return model
-        elif dataset == 'coco':
-            # from torch hub 
-            if model_name in ['yolov3', 'yolov5s']: # TODO: add more yolo models
-                model = torch.hub.load(f'ultralytics/{model_name}', f'{model_name}')
-            else: 
-                logger.info(f"No supported model {model_name}")
-
+        if dataset == 'coco':
+            # Load model
+            # TODO
+            model = DetectMultiBackend('yolov3/yolov3.pt', device='cuda:0', dnn=False)
+            model.model.float()
             return model
         else:
             logger.info(f"No supported dataset {dataset} for task {task}.\n")

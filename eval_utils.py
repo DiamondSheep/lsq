@@ -34,6 +34,7 @@ CLASSIFICATION
 def validate(model, testloader, logger, configs, verbose=True):
     total, correct = 0, 0
     bar = Bar('Testing', max=len(testloader))
+    model = model.cuda()
     model.eval()
     top1_error = AverageMeter()
     top5_error = AverageMeter()
@@ -177,9 +178,6 @@ def validate_det(
         # Given Settings
         model=None,
         dataloader=None,
-        save_dir=Path(''),
-        plots=True,
-        callbacks=Callbacks(),
         # Default Settings
         data='yolov3/data/coco.yaml', #dataset.yaml path
         weights='yolov3/yolov3.pt',  # model.pt path(s)
@@ -197,6 +195,9 @@ def validate_det(
         save_conf=False,  # save confidences in --save-txt labels
         save_json=False,  # save a COCO-JSON results file
         project=YOLOROOT / 'runs/val',  # save to project/name
+        save_dir=Path(''),
+        plots=True,
+        callbacks=Callbacks(),
         name='exp',  # save to project/name
         exist_ok=False,  # existing project/name ok, do not increment
         half=False,  # use FP16 half-precision inference
@@ -210,7 +211,8 @@ def validate_det(
     (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
 
     # Load model
-    model = DetectMultiBackend(weights, device=device, dnn=dnn)
+    if model == None:
+        model = DetectMultiBackend(weights, device=device, dnn=dnn)
     stride, pt = model.stride, model.pt
     imgsz = check_img_size(imgsz, s=stride)  # check image size
     half &= pt and device.type != 'cpu'  # half precision only supported by PyTorch on CUDA
