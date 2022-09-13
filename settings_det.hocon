@@ -10,6 +10,7 @@ dataset_path = ./data/coco/
 batch_size = 1
 img_size = 640
 model = yolov3
+model_path = yolov3/yolov3.pt
 
 # -------- Quantization Settings -------
 

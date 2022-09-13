@@ -18,6 +18,7 @@ class ConfigParser(object):
 		self.img_size = self.conf['img_size']
 		self.batch_size = self.conf['batch_size']
 		self.model = self.conf['model']
+		self.model_path = self.conf['model_path']
 		
 		# -------- Quantization Settings -------
 		self.mode = self.conf['mode']

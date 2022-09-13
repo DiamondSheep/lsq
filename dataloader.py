@@ -65,18 +65,6 @@ def getValData(dataset='imagenet',
                                  shuffle=False,
                                  num_workers=4)
         return test_loader
-    
-    elif dataset == 'coco':
-        test_transform = transforms.Compose([Normalizer(), Resizer(img_size=img_size)])
-        test_dataset = COCODataset(data_path = path, 
-                                   mode = 'val', 
-                                   transform = test_transform)
-        test_loader = DataLoader(test_dataset, 
-                                 batch_size = batch_size, 
-                                 shuffle = False, 
-                                 num_workers=4)
-        return test_loader
-
     else:
         return None
 

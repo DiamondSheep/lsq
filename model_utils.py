@@ -6,23 +6,16 @@ from pytorchcv.model_provider import get_model
 from dataloader import *
 from eval_utils import *
 from config_parser import logger
-
-# YOLO modules
-FILE = Path(__file__).resolve()
-ROOT = FILE.parents[0]  # root directory
-YOLOROOT = os.path.join(ROOT, 'yolov3')
-if str(YOLOROOT) not in sys.path:
-    sys.path.append(str(YOLOROOT))  # add YOLOROOT to PATH
-YOLOROOT = Path(os.path.relpath(YOLOROOT, Path.cwd()))  # relative
 from yolov3.models.common import DetectMultiBackend
 
 def get_fp_model(task, dataset, model_name, model_path=None):
+
     logger.info(f'Loading pretrained model {model_name} for {dataset} dataset for {task} task')
+    
     # For classification
     if (task == 'classification'):
         if (model_path):
-            # TODO: from given model path
-
+            # from given model path
             model.load_state_dict(torch.load(model_path))
         else:
             # from pytorchcv
@@ -36,21 +29,30 @@ def get_fp_model(task, dataset, model_name, model_path=None):
                 logger.info(f"No supported dataset {dataset} for task {task}.\n")
                 exit(0)
             model = get_model(model_name, pretrained=True)
-        return model
 
     # For detection
     elif (task == 'detection'):
         if dataset == 'coco':
             # Load model
-            # TODO
-            model = DetectMultiBackend('yolov3/yolov3.pt', device='cuda:0', dnn=False)
-            model.model.float()
-            return model
+            if model_path:
+                model = DetectMultiBackend(model_path, device='cuda:0', dnn=False)
+                model.model.float()
+            else:
+                logger.info(f"Illegal model path {model_path}.\n")
+                exit(0)
         else:
             logger.info(f"No supported dataset {dataset} for task {task}.\n")
-
+            exit(0)
     else:
         logger.info(f"No supported model {model_name} for task {task}.\n")
+        exit(0)
+
+    # return model
+    if model is not None:
+        logger.info("model is loaded.")
+        return model
+    else:
+        logger.info("failed to load model.")
         exit(0)
 
 if __name__ == "__main__":
