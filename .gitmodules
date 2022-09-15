@@ -3,4 +3,4 @@
 	url = git@github.com:cocodataset/cocoapi.git
 [submodule "yolov3"]
 	path = yolov3
-	url = git@github.com:ultralytics/yolov3.git
+	url = git@github.com:DiamondSheep/yolov3_forQuant.git
