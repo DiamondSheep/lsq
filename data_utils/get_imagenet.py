@@ -55,7 +55,7 @@ class LMDBDatabase(Dataset):
         super().__init__()
         lmdb_file = lmdb_path
         assert isinstance(lmdb_file, str)
-        print(' -- Data path: {} --'.format(lmdb_file))
+        print('-- Data path: {} --'.format(lmdb_file))
         assert os.path.isfile(lmdb_file)
         self.db_binary = lmdb_file
         self.db_env = lmdb.open(lmdb_file, subdir=False, readonly=True, lock=False, readahead=False, meminit=False)

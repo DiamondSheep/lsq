@@ -8,9 +8,10 @@ from config_parser import ConfigParser, print_config, benchmark, logger
 from model_utils import get_fp_model
 from dataloader import getValData
 from eval_utils import validate, validate_det
+from quant_utils import quantize_model
 
 parser = argparse.ArgumentParser(description='Quant')
-parser.add_argument('--settings', default='./settings_det.hocon', type=str,
+parser.add_argument('--settings', default='./settings_cls.hocon', type=str,
                     help='Configuration path')
 parser.add_argument('--seed', '-s', default=1, type=int,
                     help='random seed setting')
@@ -45,11 +46,11 @@ if __name__ == "__main__":
         pass
 
     ### Quantization
-
+    quant_model = quantize_model(model)
 
     ### Validation
     if configs.task == 'classification':
-        validate(model, valloader, logger, configs)
+        validate(quant_model, valloader, logger, configs)
     elif configs.task == 'detection':
         validate_det(model=model)
     else:

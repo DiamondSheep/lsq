@@ -14,8 +14,9 @@ def get_fp_model(task, dataset, model_name, model_path=None):
     
     # For classification
     if (task == 'classification'):
-        if (model_path):
+        if (os.path.isfile(model_path)):
             # from given model path
+            logger.info(f"load model weight from {model_path}")
             model.load_state_dict(torch.load(model_path))
         else:
             # from pytorchcv

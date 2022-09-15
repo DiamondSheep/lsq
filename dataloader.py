@@ -48,7 +48,7 @@ def getValData(dataset='imagenet',
                                              num_workers=4, 
                                              for_inception=for_inception)
         else:
-            print("Wrong path")
+            print(f"Wrong path: {path}")
             exit(1)
         return test_loader
         

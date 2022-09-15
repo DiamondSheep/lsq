@@ -5,8 +5,8 @@ device = 0
 task = classification
 dataset = imagenet
 
-dataset_path = ./imagenet/ILSVRC2012_img_val.lmdb
-# For local machine:   ./imagenet/ILSVRC2012_img_val.lmdb
+dataset_path = data/imagenet/ILSVRC2012_img_val.lmdb
+# For local machine:   data/imagenet/ILSVRC2012_img_val.lmdb
 # For virtual machine: /home/gaoyc/data/ILSVRC2012
 
 batch_size = 128
