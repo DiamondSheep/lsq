@@ -1,3 +1,4 @@
 pyhocon
 progress
 pycocotools
+scikit-image
