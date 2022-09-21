@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
     ### Quantization
     quant_model = quantize_model(model)
-
+    logger.info(f"model quantized.")
     ### Validation
     if configs.task == 'classification':
         validate(quant_model, valloader, logger, configs)
