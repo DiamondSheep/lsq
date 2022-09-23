@@ -5,11 +5,12 @@ device = 0
 task = classification
 dataset = imagenet
 
-dataset_path = data/imagenet/ILSVRC2012_img_val.lmdb
+val_dataset_path = data/imagenet/ILSVRC2012_img_val.lmdb
+train_dataset_path = data/imagenet/ILSVRC2012_img_train.lmdb
 # For local machine:   data/imagenet/ILSVRC2012_img_val.lmdb
 # For virtual machine: /home/gaoyc/data/ILSVRC2012
 
-batch_size = 128
+batch_size = 256
 img_size = 224
 model = resnet18
 model_path = ''
@@ -17,5 +18,8 @@ model_path = ''
 # -------- Quantization Settings -------
 
 mode = squant
+lr=0.01
+momentum=0.9
+weight_decay=0.0004
 weight_bit_width = 4
 activation_bit_width = 4

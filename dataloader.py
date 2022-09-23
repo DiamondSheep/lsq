@@ -68,6 +68,48 @@ def getValData(dataset='imagenet',
     else:
         return None
 
+def getTrainData(dataset='imagenet',
+                 batch_size=1024,
+                path='data/imagenet',
+                num_workers=4,
+                for_inception=False):
+    if dataset == 'imagenet':
+        if os.path.isdir(path):
+            print("-- File dataset loading...")
+            input_size = 299 if for_inception else 224
+            normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                            std=[0.229, 0.224, 0.225])
+            transform = transforms.Compose([
+                                transforms.Resize(int(input_size / 0.875)),
+                                transforms.CenterCrop(input_size),
+                                transforms.ToTensor(),
+                                normalize,
+                                ])
+            train_dataset = FileDataset(data_path=path, 
+                                    label_file="validation_gt_labels.txt", 
+                                    transform=transform)
+            train_loader = DataLoader(train_dataset,
+                                    batch_size=batch_size,
+                                    shuffle=False,
+                                    num_workers=num_workers)
+        
+        elif os.path.isfile(path):
+            print("-- lmdb dataset loading...")
+            train_loader = get_train_dataloader(data_path=path, 
+                                             batchsize=batch_size, 
+                                             num_workers=num_workers, 
+                                             for_inception=for_inception)
+        
+        else:
+            print(f"Wrong path: {path}")
+            exit(1)
+            
+        return train_loader
+            
+    else:
+        raise NotImplementedError
+    
+
 if __name__ == "__main__":
     valloader = getValData(dataset='coco',
                         batch_size=1,

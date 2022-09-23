@@ -8,11 +8,12 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, Dataset
 from .map_imagenet import label2num
 
-def get_train_dataloader(data_path, batchsize, num_workers, distributed=False):
+def get_train_dataloader(data_path, batchsize, num_workers, distributed=False, for_inception=False):
+    input_size = 299 if for_inception else 224
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
     transform = transforms.Compose([
-                            transforms.RandomResizedCrop(224),
+                            transforms.RandomResizedCrop(input_size),
                             transforms.RandomHorizontalFlip(),
                             transforms.ToTensor(),
                             normalize,

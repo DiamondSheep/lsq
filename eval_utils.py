@@ -30,8 +30,37 @@ from yolov3.utils.torch_utils import select_device, time_sync
 '''
 CLASSIFICATION
 '''
+
+def fine_tuning(model, dataloader, criterion, optimizer,  logger, configs):
+    total, correct = 0.0, 0.0
+    bar = Bar('Finetuning', max=len(dataloader))
+    model = model.cuda()
+    top1_error = AverageMeter()
+    top5_error = AverageMeter()
+    for batch_idx, (inputs, targets) in enumerate(dataloader):
+        inputs, targets = inputs.cuda(), targets.cuda()
+        outputs = model(inputs)
+        finetuning_loss = criterion(outputs, targets)
+        loss = torch.ones(1)
+        single_top1_error, loss, single_top5_error = compute_singlecrop(
+            outputs=outputs, labels=targets, loss=loss, 
+            top5_flag=True, mean_flag=True)
+        top1_error.update(single_top1_error)
+        top5_error.update(single_top5_error)
+        #_, predicted = outputs.max(1)
+        #total += targets.size(0)
+        #correct += predicted.eq(targets).sum().item()
+        #acc = correct / total
+        optimizer.zero_grad()
+        finetuning_loss.backward()
+        optimizer.step()
+
+        bar.suffix = f'({batch_idx + 1}/{len(dataloader)}) | ETA: {bar.eta_td} | top1: {100.0 - top1_error.avg} | top5: {100.0 - top5_error.avg}'
+        bar.next()
+
 @torch.no_grad()
 def validate(model, testloader, logger, configs, verbose=True):
+    logger.info(f"validating.")
     total, correct = 0, 0
     bar = Bar('Testing', max=len(testloader))
     model = model.cuda()

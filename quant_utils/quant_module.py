@@ -124,7 +124,7 @@ class ActLSQ(_ActQ):
         g = 1.0 / math.sqrt(x.numel() * Qp)
 
         x_q = LSQ.apply(x, self.alpha, g, Qn, Qp)
-        return x
+        return x_q
 
 class QuantAct(Module):
     """

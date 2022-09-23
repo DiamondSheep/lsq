@@ -14,7 +14,8 @@ class ConfigParser(object):
 		self.device = str(self.conf['device'])
 		self.task = str(self.conf['task'])
 		self.dataset = self.conf['dataset']
-		self.datasetPath = self.conf['dataset_path']  # path for loading data set
+		self.valDatasetPath = self.conf['val_dataset_path']  # path for loading data set
+		self.trainDatasetPath = self.conf['train_dataset_path']
 		self.img_size = self.conf['img_size']
 		self.batch_size = self.conf['batch_size']
 		self.model = self.conf['model']
@@ -22,6 +23,9 @@ class ConfigParser(object):
 		
 		# -------- Quantization Settings -------
 		self.mode = self.conf['mode']
+		self.lr = float(self.conf['lr'])
+		self.momentum = float(self.conf['momentum'])
+		self.weight_decay = float(self.conf['weight_decay'])
 		self.wbit = self.conf['weight_bit_width']
 		self.abit = self.conf['activation_bit_width']
 

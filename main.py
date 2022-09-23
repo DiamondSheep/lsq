@@ -4,11 +4,12 @@ import torch.nn as nn
 import argparse
 import logging
 
-from config_parser import ConfigParser, print_config, benchmark, logger
+from config_parser import ConfigParser, print_config, logger
 from model_utils import get_fp_model
-from dataloader import getValData
-from eval_utils import validate, validate_det
+from dataloader import getValData, getTrainData
+from eval_utils import validate, validate_det, fine_tuning
 from quant_utils import quantize_model
+from quant_utils.quant_model import freeze_model
 
 parser = argparse.ArgumentParser(description='Quant')
 parser.add_argument('--settings', default='./settings_cls.hocon', type=str,
@@ -39,18 +40,36 @@ if __name__ == "__main__":
         logger.info(f'Preparing data: {configs.dataset}')
         valloader = getValData(dataset=configs.dataset,
                             batch_size=configs.batch_size,
-                            path=configs.datasetPath,
+                            path=configs.valDatasetPath,
                             img_size=configs.img_size,
                             for_inception=configs.model.startswith('inception'))
+        trainloader = getTrainData(dataset=configs.dataset,
+                                   batch_size=configs.batch_size,
+                                   path=configs.trainDatasetPath,
+                                   for_inception=configs.model.startswith('inception'))
     elif configs.task == 'detection':
         pass
 
     ### Quantization
-    quant_model = quantize_model(model)
+    quant_model = quantize_model(model, weight_bit=configs.wbit, 
+                                        act_bit=configs.abit, 
+                                        mode="LSQ")
     logger.info(f"model quantized.")
+    
+    ### Quantization-Aware Training
+    criterion = nn.CrossEntropyLoss().cuda()
+    optimizer = torch.optim.SGD(quant_model.parameters(), 
+                                lr=configs.lr,
+                                momentum=configs.momentum, 
+                                weight_decay=configs.weight_decay)
+    
+    fine_tuning(quant_model, trainloader, criterion, optimizer, logger, configs)
+    quant_model = freeze_model(model, mode="LSQ")
+
     ### Validation
     if configs.task == 'classification':
-        validate(quant_model, valloader, logger, configs)
+        #validate(quant_model, valloader, logger, configs)
+        validate(model, valloader, logger, configs)
     elif configs.task == 'detection':
         validate_det(model=model)
     else:
